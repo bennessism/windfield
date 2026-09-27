@@ -1,4 +1,5 @@
 let weatherSourceMode='cache';
+let currentTimezone=null;
 
 const windDirBtn=document.getElementById('windDirBtn');
 const windDirCard=document.getElementById('windDirCard');
@@ -40,6 +41,26 @@ function labelFor(loc){return loc.city&&loc.city!==loc.name?`${loc.name} · ${lo
 function areaFor(loc){return loc.name||loc.city||'Location'}
 function fmtTime(iso){if(!iso)return'--';const m=String(iso).match(/T(\d{2}):(\d{2})/);if(!m)return'--';let h=Number(m[1]);const min=m[2],s=h>=12?'PM':'AM';h=h%12||12;return`${h}:${min} ${s}`}
 
+function liveDayForTimezone(timezone,fallback){
+  if(!timezone)return fallback;
+  try{
+    const hour=Number(new Intl.DateTimeFormat('en-US',{timeZone:timezone,hour:'2-digit',hourCycle:'h23'}).format(new Date()));
+    if(Number.isFinite(hour))return hour>=6&&hour<19;
+  }catch(e){}
+  return fallback;
+}
+
+function applyDayNight(nextDay){
+  const changed=nextDay!==isDay;
+  isDay=nextDay;
+  document.querySelector('meta[name="theme-color"]').content=isDay?'#76b7e8':'#07111f';
+  if(changed)seedScene(stage.clientWidth,stage.clientHeight)
+}
+
+function syncDayNight(){
+  applyDayNight(liveDayForTimezone(currentTimezone,isDay))
+}
+
 function refreshDirectionUI(){
   const fromDeg=((Number(windDir)||0)%360+360)%360;
   const towardDeg=(fromDeg+180)%360;
@@ -71,8 +92,9 @@ function applyWindData(data,label,area){
   wind=Number(data.wind_speed_kmh)||0;
   gust=Number(data.wind_gusts_kmh)||wind;
   windDir=Number(data.wind_direction_deg)||0;
-  isDay=typeof data.is_day==='boolean'?data.is_day:Number(data.is_day)===1;
-  document.querySelector('meta[name="theme-color"]').content=isDay?'#76b7e8':'#07111f';
+  currentTimezone=data.timezone||currentTimezone;
+  const cachedDay=typeof data.is_day==='boolean'?data.is_day:Number(data.is_day)===1;
+  applyDayNight(liveDayForTimezone(currentTimezone,cachedDay));
   refreshUI(data.time);
   seedScene(stage.clientWidth,stage.clientHeight)
 }
@@ -122,4 +144,5 @@ addEventListener('resize',resize);
 resize();
 requestAnimationFrame(draw);
 loadCatalog().then(()=>{const loc=selectedLocation();loadCachedWind(countrySelect.value,loc.id)});
+setInterval(syncDayNight,60*1000);
 setInterval(refreshCurrentWind,30*60*1000);
