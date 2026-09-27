@@ -19,6 +19,12 @@ function visualFlowVector(){
   return{x:visualFlowSign,y:0};
 }
 
+function leafDepthBias(){
+  const toDeg=(Number(windDir)+180)%360;
+  // -1 = blowing north/away (mostly behind tree), +1 = south/toward us (mostly in front).
+  return -Math.cos(toDeg*Math.PI/180);
+}
+
 function seedScene(w,h){
   const pad=10;
   stars=Array.from({length:95},()=>({x:pad+Math.random()*Math.max(1,w-pad*2),y:pad+Math.random()*Math.max(1,h*.46-pad*2),r:.35+Math.random()*1.15,a:.30+Math.random()*.62,p:Math.random()*Math.PI*2,tw:.0008+Math.random()*.0014}));
@@ -54,20 +60,46 @@ function drawMailbox(x,y,scale,t){
   ctx.fillStyle=isDay?'#cbbaa8':'#8c7a68';ctx.save();ctx.translate(x+12*scale,y-104*scale);ctx.rotate(flagWiggle);ctx.fillRect(0,-2*scale,3*scale,20*scale);ctx.fillRect(3*scale,-1*scale,13*scale,4*scale);ctx.restore();ctx.fillStyle=isDay?'#47653b':'#263828';ctx.beginPath();ctx.ellipse(x,y+24*scale,22*scale,9*scale,0,0,Math.PI*2);ctx.fill();ctx.restore();
 }
 
+function updateTreeLeaves(w,h,t,treeX,treeY,scale){
+  const vw=visualWindAt(t),d=visualFlowVector(),depth=leafDepthBias(),target=Math.min(36,Math.max(7,Math.floor(vw*.72)+5));
+  const frontChance=.5+depth*.35;
+  if(leafParticles.length<target&&Math.random()<Math.min(.62,.22+vw*.008)){
+    leafParticles.push({
+      x:treeX+(Math.random()-.5)*150*scale,
+      y:treeY+(Math.random()-.5)*80*scale,
+      v:.5+Math.random(),rot:Math.random()*6.28,life:0,
+      sz:(3+Math.random()*4)*scale,
+      layer:Math.random()<frontChance?'front':'back'
+    });
+  }
+  for(const p of leafParticles){
+    p.x+=d.x*(.70+Math.max(2,vw)*.052)*p.v+Math.sin(t*.0022+p.rot)*.14;
+    p.y+=(.16+.14*p.v)+Math.cos(t*.0019+p.rot)*.04;
+    p.rot+=(.045+Math.min(.08,vw*.0015))*p.v;
+    p.life++;
+  }
+  leafParticles=leafParticles.filter(p=>p.x>-80&&p.x<w+80&&p.y>-80&&p.y<h+80&&p.life<900);
+}
+
+function drawTreeLeafLayer(layer){
+  for(const p of leafParticles){
+    if((p.layer||'front')!==layer)continue;
+    const back=layer==='back',size=back?p.sz*.82:p.sz*1.05;
+    ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.globalAlpha=back?.58:.92;ctx.fillStyle=isDay?(back?'#5f7f43':'#6f9148'):(back?'#34452e':'#405234');ctx.beginPath();ctx.ellipse(0,0,size,size*.45,0,0,Math.PI*2);ctx.fill();ctx.restore();
+  }
+  ctx.globalAlpha=1;
+}
+
 function drawTree(w,h,t){
   const vw=visualWindAt(t),ground=h*.79,x=w*.76,scale=Math.max(.78,Math.min(1.32,w/1100)),d=visualFlowVector();
   const windLean=d.x*Math.min(17,Math.max(2.5,vw*.34));
   const idle=Math.sin(t*.00135)*4.2+Math.sin(t*.00052+1.2)*1.7,sway=windLean+idle;
+  updateTreeLeaves(w,h,t,x,ground-238*scale,scale);
+  drawTreeLeafLayer('back');
   ctx.save();ctx.translate(x,ground);ctx.fillStyle=isDay?'#5a3f2b':'#2b241d';ctx.beginPath();ctx.moveTo(-25*scale,5);ctx.bezierCurveTo(-19*scale,-70*scale,-18*scale,-135*scale,sway*scale,-210*scale);ctx.bezierCurveTo(18*scale,-140*scale,24*scale,-62*scale,31*scale,5);ctx.closePath();ctx.fill();ctx.strokeStyle=isDay?'#65462f':'#31271f';ctx.lineCap='round';ctx.lineWidth=13*scale;
   for(const b of[[0,-155,-70,-215],[4,-145,76,-198],[-3,-178,-40,-245],[8,-170,55,-240]]){ctx.beginPath();ctx.moveTo((b[0]+sway*.3)*scale,b[1]*scale);ctx.lineTo((b[2]+sway)*scale,b[3]*scale);ctx.stroke()}
-  const canopyY=-238*scale,lean=sway*1.7*scale;ctx.fillStyle=isDay?'#477f3e':'#25462e';for(const c of[[-68,-2,76,54],[-8,-34,92,67],[72,-6,72,55],[-26,30,90,58]]){ctx.beginPath();ctx.ellipse(c[0]*scale+lean,canopyY+c[1]*scale,c[2]*scale,c[3]*scale,0,0,Math.PI*2);ctx.fill()}ctx.fillStyle=isDay?'#5f9851':'#31583a';for(const c of[[-88,-20,43,31],[-20,-66,50,36],[54,-48,48,34],[92,-10,39,30],[-4,12,52,34]]){ctx.beginPath();ctx.ellipse(c[0]*scale+lean*.8,canopyY+c[1]*scale,c[2]*scale,c[3]*scale,0,0,Math.PI*2);ctx.fill()}ctx.restore();drawTreeLeaves(w,h,t,x,ground-238*scale,scale);
-}
-
-function drawTreeLeaves(w,h,t,treeX,treeY,scale){
-  const vw=visualWindAt(t),d=visualFlowVector(),target=Math.min(36,Math.max(7,Math.floor(vw*.72)+5));
-  if(leafParticles.length<target&&Math.random()<Math.min(.62,.22+vw*.008))leafParticles.push({x:treeX+(Math.random()-.5)*150*scale,y:treeY+(Math.random()-.5)*80*scale,v:.5+Math.random(),rot:Math.random()*6.28,life:0,sz:(3+Math.random()*4)*scale});
-  for(const p of leafParticles){p.x+=d.x*(.70+Math.max(2,vw)*.052)*p.v+Math.sin(t*.0022+p.rot)*.14;p.y+=(.16+.14*p.v)+Math.cos(t*.0019+p.rot)*.04;p.rot+=(.045+Math.min(.08,vw*.0015))*p.v;p.life++;ctx.save();ctx.translate(p.x,p.y);ctx.rotate(p.rot);ctx.fillStyle=isDay?'#6f9148':'#405234';ctx.beginPath();ctx.ellipse(0,0,p.sz,p.sz*.45,0,0,Math.PI*2);ctx.fill();ctx.restore()}
-  leafParticles=leafParticles.filter(p=>p.x>-80&&p.x<w+80&&p.y>-80&&p.y<h+80&&p.life<900);
+  const canopyY=-238*scale,lean=sway*1.7*scale;ctx.fillStyle=isDay?'#477f3e':'#25462e';for(const c of[[-68,-2,76,54],[-8,-34,92,67],[72,-6,72,55],[-26,30,90,58]]){ctx.beginPath();ctx.ellipse(c[0]*scale+lean,canopyY+c[1]*scale,c[2]*scale,c[3]*scale,0,0,Math.PI*2);ctx.fill()}ctx.fillStyle=isDay?'#5f9851':'#31583a';for(const c of[[-88,-20,43,31],[-20,-66,50,36],[54,-48,48,34],[92,-10,39,30],[-4,12,52,34]]){ctx.beginPath();ctx.ellipse(c[0]*scale+lean*.8,canopyY+c[1]*scale,c[2]*scale,c[3]*scale,0,0,Math.PI*2);ctx.fill()}ctx.restore();
+  drawTreeLeafLayer('front');
 }
 
 function drawKites(w,h,t){
