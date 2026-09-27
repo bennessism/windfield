@@ -1,5 +1,7 @@
 let weatherSourceMode='cache';
 let currentTimezone=null;
+let lastWeatherRefresh=0;
+let weatherRefreshInFlight=false;
 
 const windDirBtn=document.getElementById('windDirBtn');
 const windDirCard=document.getElementById('windDirCard');
@@ -9,7 +11,7 @@ const windDirFrom=document.getElementById('windDirFrom');
 
 async function loadCatalog(){
   try{
-    catalog=await fetch('https://raw.githubusercontent.com/bennessism/window/main/weather/catalog.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error();return r.json()})
+    catalog=await fetch(`https://raw.githubusercontent.com/bennessism/window/main/weather/catalog.json?ts=${Date.now()}`,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error();return r.json()})
   }catch(e){
     catalog={default:{country:'my',location:'selangor'},countries:{my:{name:'Malaysia',locations:[{id:'selangor',name:'Selangor',city:'Shah Alam',lat:3.0738,lon:101.5183}]}}}
   }
@@ -102,7 +104,8 @@ function applyWindData(data,label,area){
 async function loadCachedWind(countryCode=countrySelect.value,locationId=locationSelect.value){
   const country=catalog?.countries?.[countryCode];
   const loc=country?.locations?.find(l=>l.id===locationId)||country?.locations?.[0];
-  if(!loc)return;
+  if(!loc||weatherRefreshInFlight)return;
+  weatherRefreshInFlight=true;
   weatherSourceMode='cache';
   currentLat=loc.lat;
   currentLon=loc.lon;
@@ -113,13 +116,21 @@ async function loadCachedWind(countryCode=countrySelect.value,locationId=locatio
     const payload=await fetch(url,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error();return r.json()});
     const data=payload.locations?.[loc.id];
     if(!data)throw new Error();
+    lastWeatherRefresh=Date.now();
     applyWindData(data,labelFor(loc),areaFor(loc))
   }catch(e){
     summaryLine.textContent=currentArea+' · data unavailable'
+  }finally{
+    weatherRefreshInFlight=false
   }
 }
 
 function refreshCurrentWind(){return loadCachedWind(countrySelect.value,locationSelect.value)}
+function refreshWhenActive(force=false){
+  if(document.hidden||!catalog)return;
+  if(!force&&Date.now()-lastWeatherRefresh<60*1000)return;
+  refreshCurrentWind()
+}
 
 summaryBtn.onclick=()=>{const open=detailCard.classList.toggle('show');summaryBtn.classList.toggle('open',open);if(!open)picker.classList.remove('show')};
 document.getElementById('detailClose').onclick=()=>{detailCard.classList.remove('show');summaryBtn.classList.remove('open');picker.classList.remove('show')};
@@ -141,8 +152,11 @@ windDirBtn.onclick=()=>{
 
 scroller.addEventListener('scroll',()=>{if(innerWidth>700)return;const i=Math.max(0,Math.min(2,Math.round(scroller.scrollLeft/innerWidth)));document.querySelectorAll('.dots i').forEach((d,n)=>d.classList.toggle('on',n===i))},{passive:true});
 addEventListener('resize',resize);
+addEventListener('focus',()=>refreshWhenActive(true));
+addEventListener('pageshow',()=>refreshWhenActive(true));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden){syncDayNight();refreshWhenActive(true)}});
 resize();
 requestAnimationFrame(draw);
 loadCatalog().then(()=>{const loc=selectedLocation();loadCachedWind(countrySelect.value,loc.id)});
 setInterval(syncDayNight,60*1000);
-setInterval(refreshCurrentWind,30*60*1000);
+setInterval(()=>refreshWhenActive(false),15*60*1000);
