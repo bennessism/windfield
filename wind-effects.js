@@ -42,8 +42,8 @@ function weatherLocalHour(timezone){
 function weatherTimeBand(hour){
   if(hour>=6&&hour<11)return'morning';
   if(hour>=11&&hour<14)return'midday';
-  if(hour>=14&&hour<17.5)return'afternoon';
-  if(hour>=17.5&&hour<19)return'evening';
+  if(hour>=14&&hour<18)return'afternoon';
+  if(hour>=18&&hour<19)return'evening';
   return'night';
 }
 
@@ -136,7 +136,7 @@ function drawWeatherFx(t){
     if(weatherNextFlash&&t>=weatherNextFlash){weatherFlashAt=t;weatherNextFlash=t+7000+Math.random()*13000}
     const age=t-weatherFlashAt;
     if(age>=0&&age<260){
-      const a=age<70?.12*(1-age/70):.045*(1-(age-70)/190);
+      const a=age<70 ? .12*(1-age/70) : .045*(1-(age-70)/190);
       weatherFxCtx.fillStyle=`rgba(225,238,255,${Math.max(0,a)})`;
       weatherFxCtx.fillRect(0,0,w,h);
     }
