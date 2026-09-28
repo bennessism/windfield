@@ -107,41 +107,6 @@ function applyWindData(data,label,area){
   seedScene(stage.clientWidth,stage.clientHeight)
 }
 
-function cacheIsStale(updatedAt){
-  const stamp=Date.parse(updatedAt||'');
-  return !Number.isFinite(stamp)||Date.now()-stamp>6*60*60*1000
-}
-
-async function fetchLiveWeather(loc){
-  const params=new URLSearchParams({
-    latitude:String(loc.lat),
-    longitude:String(loc.lon),
-    current:'temperature_2m,apparent_temperature,relative_humidity_2m,precipitation,rain,showers,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day',
-    timezone:'auto',
-    wind_speed_unit:'kmh'
-  });
-  const payload=await fetch(`https://api.open-meteo.com/v1/forecast?${params}`,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error();return r.json()});
-  const c=payload.current||{};
-  return{
-    latitude:payload.latitude,
-    longitude:payload.longitude,
-    timezone:payload.timezone,
-    time:c.time,
-    temperature_c:c.temperature_2m,
-    apparent_temperature_c:c.apparent_temperature,
-    relative_humidity_pct:c.relative_humidity_2m,
-    precipitation_mm:c.precipitation,
-    rain_mm:c.rain,
-    showers_mm:c.showers,
-    weather_code:c.weather_code,
-    cloud_cover_pct:c.cloud_cover,
-    wind_speed_kmh:c.wind_speed_10m,
-    wind_direction_deg:c.wind_direction_10m,
-    wind_gusts_kmh:c.wind_gusts_10m,
-    is_day:Number(c.is_day)===1
-  }
-}
-
 async function loadCachedWind(countryCode=countrySelect.value,locationId=locationSelect.value){
   const country=catalog?.countries?.[countryCode];
   const loc=country?.locations?.find(l=>l.id===locationId)||country?.locations?.[0];
@@ -155,27 +120,12 @@ async function loadCachedWind(countryCode=countrySelect.value,locationId=locatio
   try{
     const url=`https://raw.githubusercontent.com/bennessism/window/main/weather/data/${countryCode}.json?ts=${Date.now()}`;
     const payload=await fetch(url,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error();return r.json()});
-    let data=payload.locations?.[loc.id];
+    const data=payload.locations?.[loc.id];
     if(!data)throw new Error();
-    if(cacheIsStale(payload.updated_at)){
-      try{
-        data=await fetchLiveWeather(loc);
-        weatherSourceMode='live';
-      }catch(e){
-        weatherSourceMode='cache'
-      }
-    }
     lastWeatherRefresh=Date.now();
     applyWindData(data,labelFor(loc),areaFor(loc))
   }catch(e){
-    try{
-      const data=await fetchLiveWeather(loc);
-      weatherSourceMode='live';
-      lastWeatherRefresh=Date.now();
-      applyWindData(data,labelFor(loc),areaFor(loc))
-    }catch(liveError){
-      summaryLine.textContent=currentArea+' · data unavailable'
-    }
+    summaryLine.textContent=currentArea+' · data unavailable'
   }finally{
     weatherRefreshInFlight=false
   }
