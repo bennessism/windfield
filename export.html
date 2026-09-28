@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101820">
+<title>Wind Field Export</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:#0d141b;color:#eef5f8}body{display:grid;place-items:center;padding:24px}.card{width:min(520px,100%);padding:22px;border:1px solid #ffffff14;border-radius:20px;background:#151e26;box-shadow:0 22px 60px #0006}.eyebrow{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.48}.title{margin:6px 0 4px;font-size:25px}.sub{margin:0 0 20px;font-size:12px;line-height:1.55;opacity:.62}.row{display:grid;gap:8px;margin-top:14px}label{font-size:10px;opacity:.62}input,select,button{font:inherit}input,select{width:100%;padding:12px;border:1px solid #ffffff18;border-radius:11px;background:#0c1319;color:#fff;outline:none}button{border:0;border-radius:11px;padding:12px 14px;background:#dceff7;color:#10202a;font-weight:750;cursor:pointer}.secondary{background:#ffffff10;color:#fff;border:1px solid #ffffff14}.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:16px}.status{min-height:18px;margin-top:12px;font-size:11px;opacity:.65}.gate[hidden],.exporter[hidden]{display:none}.meta{margin-top:15px;padding:11px 12px;border-radius:11px;background:#ffffff08;font-size:10px;line-height:1.6;opacity:.66}.back{display:inline-block;margin-top:16px;color:#d7edf6;font-size:11px;text-decoration:none;opacity:.7}@media(max-width:520px){body{padding:14px}.card{padding:18px}.actions{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="eyebrow">Wind Field</div>
+  <h1 class="title">Weather history export</h1>
+  <p class="sub">Export archived Wind Field weather snapshots by month and country.</p>
+
+  <section class="gate" id="gate">
+    <div class="row"><label for="password">Password</label><input id="password" type="password" autocomplete="current-password" placeholder="Enter password"></div>
+    <button id="unlock" type="button" style="width:100%;margin-top:12px">Unlock export</button>
+    <div class="status" id="gateStatus"></div>
+  </section>
+
+  <section class="exporter" id="exporter" hidden>
+    <div class="row"><label for="month">Archive month</label><select id="month"></select></div>
+    <div class="row"><label for="country">Country</label><select id="country"></select></div>
+    <div class="actions"><button id="jsonBtn" type="button">Export JSON</button><button id="csvBtn" class="secondary" type="button">Export CSV</button></div>
+    <div class="status" id="exportStatus">Ready.</div>
+    <div class="meta">Exports are generated in your browser from the repository's archived <code>.jsonl</code> snapshots. Nothing is uploaded by this page.</div>
+  </section>
+  <a class="back" href="./">← Back to Wind Field</a>
+</main>
+<script>
+const PASS_HASH='2aa0f2f2ea687f2967eb4ad39b5112d81ea142aead768c245ac8a98517a032da';
+const gate=document.getElementById('gate'),exporter=document.getElementById('exporter'),password=document.getElementById('password'),gateStatus=document.getElementById('gateStatus'),exportStatus=document.getElementById('exportStatus'),monthSelect=document.getElementById('month'),countrySelect=document.getElementById('country');
+const API='https://api.github.com/repos/bennessism/windfield/contents/weather-history';
+const RAW='https://raw.githubusercontent.com/bennessism/windfield/main/weather-history';
+const CATALOG='https://raw.githubusercontent.com/bennessism/window/main/weather/catalog.json';
+
+async function sha256(text){
+  const data=new TextEncoder().encode(text);
+  const digest=await crypto.subtle.digest('SHA-256',data);
+  return Array.from(new Uint8Array(digest),b=>b.toString(16).padStart(2,'0')).join('');
+}
+function setUnlocked(){gate.hidden=true;exporter.hidden=false;sessionStorage.setItem('wind-export-unlocked','1');loadOptions()}
+async function unlock(){
+  gateStatus.textContent='Checking…';
+  try{
+    if(await sha256(password.value)===PASS_HASH){password.value='';gateStatus.textContent='';setUnlocked()}
+    else gateStatus.textContent='Incorrect password.';
+  }catch(e){gateStatus.textContent='This browser cannot verify the password.'}
+}
+
+document.getElementById('unlock').onclick=unlock;
+password.addEventListener('keydown',e=>{if(e.key==='Enter')unlock()});
+
+async function loadOptions(){
+  exportStatus.textContent='Loading archive list…';
+  try{
+    const [months,catalog]=await Promise.all([
+      fetch(API,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error();return r.json()}),
+      fetch(CATALOG,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error();return r.json()})
+    ]);
+    const monthNames=months.filter(x=>x.type==='dir').map(x=>x.name).sort().reverse();
+    monthSelect.innerHTML=monthNames.map(m=>`<option value="${m}">${m}</option>`).join('');
+    countrySelect.innerHTML=Object.entries(catalog.countries||{}).map(([code,c])=>`<option value="${code}">${c.name}</option>`).join('');
+    countrySelect.value=localStorage.getItem('windCountry')||'my';
+    if(!countrySelect.value&&countrySelect.options.length)countrySelect.selectedIndex=0;
+    exportStatus.textContent='Ready.';
+  }catch(e){exportStatus.textContent='Could not load archive list.'}
+}
+
+async function loadRecords(){
+  const month=monthSelect.value,country=countrySelect.value;
+  if(!month||!country)throw new Error('Choose a month and country.');
+  exportStatus.textContent='Reading archive…';
+  const text=await fetch(`${RAW}/${month}/${country}.jsonl?ts=${Date.now()}`,{cache:'no-store'}).then(r=>{if(!r.ok)throw new Error('No archive for that selection.');return r.text()});
+  const records=text.split(/\r?\n/).filter(Boolean).map(line=>JSON.parse(line));
+  if(!records.length)throw new Error('Archive is empty.');
+  return{month,country,records};
+}
+
+function download(name,type,content){
+  const blob=new Blob([content],{type});
+  const url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000)
+}
+function csvCell(value){const s=value==null?'':String(value);return /[",\n]/.test(s)?`"${s.replaceAll('"','""')}"`:s}
+function flatten(records){
+  const rows=[];
+  for(const record of records){
+    for(const [id,loc] of Object.entries(record.locations||{}))rows.push({
+      source_updated_at:record.source_updated_at,archived_at:record.archived_at,country_code:record.country_code,country:record.country,location_id:id,name:loc.name||'',city:loc.city||'',time:loc.time||'',timezone:loc.timezone||'',temperature_c:loc.temperature_c??'',apparent_temperature_c:loc.apparent_temperature_c??'',relative_humidity_pct:loc.relative_humidity_pct??'',weather_code:loc.weather_code??'',cloud_cover_pct:loc.cloud_cover_pct??'',precipitation_mm:loc.precipitation_mm??'',rain_mm:loc.rain_mm??'',showers_mm:loc.showers_mm??'',wind_speed_kmh:loc.wind_speed_kmh??'',wind_gusts_kmh:loc.wind_gusts_kmh??'',wind_direction_deg:loc.wind_direction_deg??'',is_day:loc.is_day??''
+    })
+  }
+  return rows
+}
+
+async function exportJson(){
+  try{const data=await loadRecords();download(`windfield-${data.month}-${data.country}.json`,'application/json',JSON.stringify(data.records,null,2));exportStatus.textContent=`Exported ${data.records.length} snapshot(s) as JSON.`}catch(e){exportStatus.textContent=e.message||'Export failed.'}
+}
+async function exportCsv(){
+  try{
+    const data=await loadRecords(),rows=flatten(data.records);if(!rows.length)throw new Error('No location rows found.');
+    const headers=Object.keys(rows[0]);const csv=[headers.join(','),...rows.map(row=>headers.map(h=>csvCell(row[h])).join(','))].join('\n');
+    download(`windfield-${data.month}-${data.country}.csv`,'text/csv;charset=utf-8',csv);exportStatus.textContent=`Exported ${rows.length} location row(s) as CSV.`
+  }catch(e){exportStatus.textContent=e.message||'Export failed.'}
+}
+document.getElementById('jsonBtn').onclick=exportJson;
+document.getElementById('csvBtn').onclick=exportCsv;
+if(sessionStorage.getItem('wind-export-unlocked')==='1')setUnlocked();
+</script>
+</body>
+</html>
