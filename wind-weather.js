@@ -73,11 +73,11 @@ function refreshDirectionUI(){
   windDirBtn.setAttribute('aria-label',`Wind blowing toward ${towardName}, from ${fromName}`);
 }
 
-function refreshUI(updatedIso){
+function refreshUI(updatedIso,weatherText=''){
   const strength=windStrength(wind),dir=compassName(windDir);
   summaryLine.textContent=`${currentArea} · ${strength} · ${Math.round(wind)} km/h`;
   detailLoc.textContent=currentPlace;
-  conditionEl.textContent=strength;
+  conditionEl.textContent=weatherText?`${strength} · ${weatherText}`:strength;
   speedEl.textContent=Math.round(wind);
   gustEl.textContent=Math.round(gust)+' km/h';
   fromText.textContent='From '+dir;
@@ -97,7 +97,11 @@ function applyWindData(data,label,area){
   currentTimezone=data.timezone||currentTimezone;
   const cachedDay=typeof data.is_day==='boolean'?data.is_day:Number(data.is_day)===1;
   applyDayNight(liveDayForTimezone(currentTimezone,cachedDay));
-  refreshUI(data.time);
+  if(typeof applyWeatherEffects==='function')applyWeatherEffects(data);
+  const weatherText=typeof weatherEffectName==='function'&&typeof weatherEffectKind==='function'
+    ?weatherEffectName(weatherEffectKind(Number(data.weather_code||0),Number(data.rain_mm||0)+Number(data.showers_mm||0)))
+    :'';
+  refreshUI(data.time,weatherText);
   seedScene(stage.clientWidth,stage.clientHeight)
 }
 
