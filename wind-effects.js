@@ -47,6 +47,34 @@ function weatherTimeBand(hour){
   return'night';
 }
 
+function weatherSunAlpha(){
+  const kind=weatherFxState.kind,cloud=weatherFxState.cloud;
+  if(['rain','heavy-rain','storm','fog'].includes(kind))return 0;
+  if(kind==='cloudy')return cloud>=85?.03:.10;
+  if(kind==='partly-cloudy')return Math.max(.18,.62-cloud/190);
+  return Math.max(.55,.88-cloud/240);
+}
+
+// Replace the original always-visible daytime sun with a weather-aware version.
+drawSky=function(w,h){
+  const kind=weatherFxState.kind,cloud=weatherFxState.cloud;
+  let dayColors=['#6fb4e8','#d9efff','#f3d6a4'];
+  if(kind==='cloudy'||cloud>80)dayColors=['#7895aa','#b6c5ce','#c9c9b8'];
+  if(['rain','heavy-rain','storm'].includes(kind))dayColors=['#627887','#93a4ad','#aaa99a'];
+  if(kind==='fog')dayColors=['#9eafb7','#cbd4d7','#d3d1c5'];
+  const c=isDay?dayColors:['#06101d','#132640','#263a53'],g=ctx.createLinearGradient(0,0,0,h*.72);
+  g.addColorStop(0,c[0]);g.addColorStop(.66,c[1]);g.addColorStop(1,c[2]);ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  if(!isDay){
+    const starAlpha=['cloudy','rain','heavy-rain','storm','fog'].includes(kind)?Math.max(0,.55-cloud/120):1;
+    ctx.fillStyle='#fff';for(const s of stars){ctx.globalAlpha=s.a*starAlpha;ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);ctx.fill()}
+    const moonAlpha=['rain','heavy-rain','storm','fog'].includes(kind)?0:kind==='cloudy'?.16:.88;
+    ctx.globalAlpha=moonAlpha;ctx.fillStyle='#f5efcf';ctx.beginPath();ctx.arc(w*.82,h*.145,27,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1
+  }else{
+    const sunAlpha=weatherSunAlpha();
+    if(sunAlpha>0){ctx.fillStyle='#fff8c6';ctx.globalAlpha=sunAlpha;ctx.beginPath();ctx.arc(w*.84,h*.13,34,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
+  }
+}
+
 function resizeWeatherFx(){
   const r=stage.getBoundingClientRect();
   weatherFxDpr=Math.min(devicePixelRatio||1,2);
