@@ -1,9 +1,10 @@
-const CACHE_NAME='wind-field-v9';
+const CACHE_NAME='wind-field-v10';
 const APP_SHELL=[
   './',
   './index.html',
   './wind-style.css',
   './wind-scene.js',
+  './wind-effects.js',
   './wind-polish.js',
   './wind-mail.js',
   './wind-weather.js',
@@ -38,9 +39,9 @@ self.addEventListener('fetch',event=>{
     event.respondWith(
       fetch(req).then(res=>{
         const copy=res.clone();
-        caches.open(CACHE_NAME).then(cache=>cache.put('./index.html',copy));
+        caches.open(CACHE_NAME).then(cache=>cache.put(req,copy));
         return res;
-      }).catch(()=>caches.match('./index.html'))
+      }).catch(()=>caches.match(req).then(cached=>cached||caches.match('./index.html')))
     );
     return;
   }
