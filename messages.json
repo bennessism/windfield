@@ -1,32 +1,202 @@
 [
-  {"greeting":"Dear You,","body":"The wind is moving enough today. You do not need to rush as well.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"A slow breeze still changes the field, even if it does not look dramatic.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"Some days are strong winds. Some days are only soft air. Both still belong to the sky.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"If today feels still, perhaps it is only gathering a little movement.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"Not every change arrives loudly. Some of it comes like a breeze through an open field.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"The kites know this well: even a small wind can be enough.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"Strong winds pass. Gentle winds pass too. Either way, the sky does not keep them forever.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"You are allowed to drift a little before choosing a direction.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"Some things only need a little lift, not a storm.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"The tree does not argue with the wind. It sways, and remains a tree.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"When the air is quiet, even the smallest motion becomes noticeable.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"A breeze does not need to explain itself to be real.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"You do not need to hold on to every passing thing. Some are only weather.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"The field keeps its calm, even when the wind changes its mind.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"If your thoughts are gusty today, let them pass through instead of building a house there.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"The mailbox stands still, yet every breeze visits it first.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"Some mornings arrive like clear wind across open land. Some arrive with heavier skies. Both still arrive.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"If the wind turns, you are allowed to turn with it.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"Leaves are not worried when they let go. They simply travel differently.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"A calm day is not an empty day.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"There is no prize for becoming a storm when a breeze would do.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"Sometimes the wind only wants to remind you that the world is still moving.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"Kites rise because they work with the wind, not against it.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"If today feels overcast, remember that even hidden skies still have air moving through them.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"A little sway is not the same as being lost.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"The strongest gusts are not permanent. They only feel that way while passing through.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"There are days for standing firm, and days for leaning gently.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"Even the softest wind can carry a thought farther than you expected.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"If nothing dramatic happened today, perhaps the day was kind to you.","closing":"Yours sincerely."},
-  {"greeting":"Dear You,","body":"The sky changes often. That is not a flaw. It is simply what skies do.","closing":"Yours sincerely."}
+  {
+    "greeting": "Dear You,",
+    "body": "The wind is moving enough today. You do not need to rush as well.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "A slow breeze still changes the field, even if it does not look dramatic.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Some days are strong winds. Some days are only soft air. Both still belong to the sky.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "If today feels still, perhaps it is only gathering a little movement.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Not every change arrives loudly. Some of it comes like a breeze through an open field.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "The kites know this well: even a small wind can be enough.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Strong winds pass. Gentle winds pass too. Either way, the sky does not keep them forever.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "You are allowed to drift a little before choosing a direction.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Some things only need a little lift, not a storm.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "The tree does not argue with the wind. It sways, and remains a tree.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "When the air is quiet, even the smallest motion becomes noticeable.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "A breeze does not need to explain itself to be real.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "You do not need to hold on to every passing thing. Some are only weather.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "The field keeps its calm, even when the wind changes its mind.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "If your thoughts are gusty today, let them pass through instead of building a house there.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "The mailbox stands still, yet every breeze visits it first.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Some mornings arrive like clear wind across open land. Some arrive with heavier skies. Both still arrive.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "If the wind turns, you are allowed to turn with it.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Leaves are not worried when they let go. They simply travel differently.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "A calm day is not an empty day.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "There is no prize for becoming a storm when a breeze would do.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Sometimes the wind only wants to remind you that the world is still moving.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Kites rise because they work with the wind, not against it.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "If today feels overcast, remember that even hidden skies still have air moving through them.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "A little sway is not the same as being lost.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "The strongest gusts are not permanent. They only feel that way while passing through.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "There are days for standing firm, and days for leaning gently.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Even the softest wind can carry a thought farther than you expected.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "If nothing dramatic happened today, perhaps the day was kind to you.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "The sky changes often. That is not a flaw. It is simply what skies do.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "A changing wind does not mean you chose the wrong direction.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Some answers arrive slowly, like a breeze finding its way through an open window.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "You do not have to know where the wind is going to feel it move.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Even uncertain air can carry you somewhere gentle.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "The field does not ask the wind to stay the same.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "A quiet breeze can still move what has been standing still for too long.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Not knowing the next direction does not mean there is no direction at all.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "Sometimes progress feels less like walking and more like being carried a little.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "The wind changes because movement was never meant to be permanent in one direction.",
+    "closing": "Yours sincerely."
+  },
+  {
+    "greeting": "Dear You,",
+    "body": "You can pause without becoming still forever.",
+    "closing": "Yours sincerely."
+  }
 ]
